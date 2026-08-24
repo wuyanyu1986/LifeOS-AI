@@ -31,5 +31,6 @@ Only one is required. Prefer a direct message to the reviewer for the MVP.
 3. `公众号文章待审核`
 4. `修改完成，请重新审核`
 5. `本条日记全部审核完成`
+6. `微信公众号草稿待审核`
 
 Do not send reminders until the reviewer or review chat is explicitly configured and verified.

@@ -11,6 +11,7 @@
 | Video review | `video-script-review.md` | Draft | Video document created or revised |
 | WeChat article generation | `wechat-article-generation-flow.md` | Review | Parsed note approved |
 | WeChat article review | `wechat-article-review.md` | Draft | Article document created or revised |
+| WeChat MP draft publishing | `wechat-mp-draft-publishing-flow.md` | Review | WeChat article approved |
 
 ## By State
 
@@ -20,5 +21,8 @@
 | `parsed_changes_requested` | Parsed-note review | Revised note is resubmitted |
 | `generating_derivatives` | Parsed-note approval | Both generation jobs settle |
 | `derivatives_pending_review` | A derivative is created | Both derivatives approved |
-| `completed` | Video and article approval | Terminal |
+| `preparing_wechat_draft` | WeChat article approval | Draft created or configuration blocked |
+| `wechat_draft_configuration_required` | Missing local WeChat credentials | Configuration supplied and retried |
+| `wechat_draft_pending_review` | WeChat draft created | Manual review and publication in WeChat |
+| `completed` | Legacy entries only | Terminal |
 | `failed` | Permanent processing failure | Manual retry or repair |

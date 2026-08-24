@@ -102,19 +102,47 @@ def apply_review_command(
             if decision == "approved"
             else "revise_parsed_note"
         )
+    elif stage == "wechat_article":
+        if decision == "changes_requested":
+            state["pipeline_status"] = "derivatives_pending_review"
+            action = "revise_wechat_article"
+        else:
+            draft_state = state.setdefault(
+                "wechat_mp_draft",
+                {
+                    "status": "not_created",
+                    "revision": 0,
+                    "cover_path": None,
+                    "cover_square_path": None,
+                    "cover_media_id": None,
+                    "draft_media_id": None,
+                    "created_at": None,
+                    "notification_status": "not_sent",
+                    "notification_message_id": None,
+                    "last_error": None,
+                },
+            )
+            draft_state["status"] = "preparing"
+            draft_state["last_error"] = None
+            state["pipeline_status"] = "preparing_wechat_draft"
+            action = "prepare_wechat_draft"
     else:
         if decision == "changes_requested":
             state["pipeline_status"] = "derivatives_pending_review"
-            action = f"revise_{stage}"
-        elif (
-            state["video_script"]["status"] == "approved"
-            and state["wechat_article"]["status"] == "approved"
-        ):
-            state["pipeline_status"] = "completed"
-            action = "complete_entry"
-        else:
+            action = "revise_video_script"
+        elif state["wechat_article"]["status"] != "approved":
             state["pipeline_status"] = "derivatives_pending_review"
             action = "wait_for_sibling_review"
+        else:
+            draft_status = state.get("wechat_mp_draft", {}).get(
+                "status", "not_created"
+            )
+            state["pipeline_status"] = (
+                "wechat_draft_pending_review"
+                if draft_status == "pending_review"
+                else "preparing_wechat_draft"
+            )
+            action = "wait_for_wechat_draft"
 
     atomic_write_json(state_path, state)
     return {"changed": True, "action": action, "state": state}
@@ -139,10 +167,15 @@ def build_acknowledgement(command: dict[str, str], result: dict) -> str:
             f"审核已记录：{entry_key} 标准解析稿已通过。\n"
             "视频脚本和公众号文章已进入生成队列，系统将在下一轮自动处理。"
         )
-    if result["action"] == "complete_entry":
+    if result["action"] == "prepare_wechat_draft":
         return (
             f"审核已记录：{entry_key} {label}已通过。\n"
-            "视频脚本与公众号文章均已通过，本条 LifeOS 流程已完成。"
+            "封面生成与微信公众号草稿创建已进入队列；草稿创建后会再次提醒你审核。"
+        )
+    if result["action"] == "wait_for_wechat_draft":
+        return (
+            f"审核已记录：{entry_key} {label}已通过。\n"
+            "公众号文章已通过，微信公众号草稿分支正在处理或等待最终审核。"
         )
     return (
         f"审核已记录：{entry_key} {label}已通过。\n"

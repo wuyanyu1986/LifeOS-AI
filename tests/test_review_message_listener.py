@@ -36,7 +36,7 @@ class ReviewMessageListenerTest(unittest.TestCase):
             },
         )
 
-    def test_completion_acknowledgement_is_explicit(self):
+    def test_article_approval_acknowledgement_starts_mp_draft(self):
         acknowledgement = build_acknowledgement(
             {
                 "decision": "approved",
@@ -44,10 +44,56 @@ class ReviewMessageListenerTest(unittest.TestCase):
                 "stage": "wechat_article",
                 "comment": "",
             },
-            {"action": "complete_entry"},
+            {"action": "prepare_wechat_draft"},
         )
-        self.assertIn("均已通过", acknowledgement)
-        self.assertIn("流程已完成", acknowledgement)
+        self.assertIn("微信公众号草稿", acknowledgement)
+        self.assertIn("进入队列", acknowledgement)
+
+    def test_article_approval_queues_wechat_draft(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state_path = Path(directory) / "review-state.json"
+            state_path.write_text(
+                json.dumps(
+                    {
+                        "pipeline_status": "derivatives_pending_review",
+                        "parsed_note": {"status": "approved"},
+                        "video_script": {"status": "approved"},
+                        "wechat_article": {
+                            "status": "pending_review",
+                            "reviewer_open_id": None,
+                            "reviewed_at": None,
+                            "review_comment": None,
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            result = apply_review_command(
+                state_path,
+                {
+                    "decision": "approved",
+                    "entry_key": "2026-08-24-2",
+                    "stage": "wechat_article",
+                    "comment": "",
+                },
+                "ou_reviewer",
+            )
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            self.assertEqual(result["action"], "prepare_wechat_draft")
+            self.assertEqual(state["pipeline_status"], "preparing_wechat_draft")
+            self.assertEqual(state["wechat_mp_draft"]["status"], "preparing")
+
+    def test_video_approval_waits_for_wechat_draft(self):
+        acknowledgement = build_acknowledgement(
+            {
+                "decision": "approved",
+                "entry_key": "2026-08-24-2",
+                "stage": "video_script",
+                "comment": "",
+            },
+            {"action": "wait_for_wechat_draft"},
+        )
+        self.assertIn("公众号草稿分支", acknowledgement)
 
     def test_parsed_approval_queues_derivative_generation(self):
         with tempfile.TemporaryDirectory() as directory:

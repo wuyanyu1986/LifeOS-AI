@@ -3,6 +3,8 @@ entries/
 .models/
 .DS_Store
 .runtime/
+wechat-mp.env
+.env
 __pycache__/
 
 # Local media files should stay outside the repository.
