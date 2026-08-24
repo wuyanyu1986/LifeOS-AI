@@ -114,11 +114,49 @@ def append_action(actions_path: Path, payload: dict) -> None:
         handle.write(json.dumps(payload, ensure_ascii=False) + "\n")
 
 
+def sync_feishu_review_status(
+    state: dict, stage: str, decision: str, comment: str, profile: str
+) -> None:
+    doc_token = state[stage].get("doc_token")
+    if not doc_token:
+        return
+
+    if decision == "approved":
+        replacement = "✅ 审核状态：已通过"
+    else:
+        replacement = f"⚠️ 审核状态：需修改\n\n审核意见：{comment}"
+
+    subprocess.run(
+        [
+            "lark-cli",
+            "docs",
+            "+update",
+            "--profile",
+            profile,
+            "--as",
+            "user",
+            "--doc",
+            doc_token,
+            "--mode",
+            "replace_all",
+            "--selection-with-ellipsis",
+            "🟡 审核状态：待审核",
+            "--markdown",
+            replacement,
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+
+
 def handle_event(
     event: dict,
     entries_dir: Path,
     actions_path: Path,
     reviewer_open_id: str,
+    profile: str = "siyangyuan-tiantu",
 ) -> dict | None:
     if event.get("type") != "im.message.receive_v1":
         return None
@@ -135,6 +173,16 @@ def handle_event(
 
     result = apply_review_command(state_path, command, reviewer_open_id)
     if result.get("changed"):
+        try:
+            sync_feishu_review_status(
+                result["state"],
+                command["stage"],
+                command["decision"],
+                command["comment"],
+                profile,
+            )
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
+            print(f"feishu_status_sync_error: {error}", file=sys.stderr, flush=True)
         append_action(
             actions_path,
             {
@@ -153,12 +201,13 @@ def handle_event(
 def run_listener(args: argparse.Namespace) -> int:
     config = load_json(args.config)
     reviewer_open_id = config["reviewer_open_id"]
+    profile = config.get("profile", "siyangyuan-tiantu")
     command = [
         "lark-cli",
         "event",
         "+subscribe",
         "--profile",
-        config.get("profile", "siyangyuan-tiantu"),
+        profile,
         "--as",
         "bot",
         "--event-types",
@@ -179,7 +228,11 @@ def run_listener(args: argparse.Namespace) -> int:
         try:
             event = json.loads(line)
             result = handle_event(
-                event, args.entries_dir, args.actions_path, reviewer_open_id
+                event,
+                args.entries_dir,
+                args.actions_path,
+                reviewer_open_id,
+                profile,
             )
             if result:
                 print(json.dumps(result, ensure_ascii=False), flush=True)

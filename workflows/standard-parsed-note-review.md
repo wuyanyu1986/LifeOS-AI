@@ -11,10 +11,11 @@ The Wiki scanner detects a new direct child document whose title matches `YYYY-M
 
 1. Fetch and validate the parsed note structure.
 2. Create a review-state record with `parsed_note.status=pending_review`.
-3. Send a Feishu message titled `标准解析稿待审核` with the document link.
-4. Wait for an explicit approve or change-request command from the configured reviewer.
-5. On approval, set `parsed_note.status=approved` and start both derivative generators.
-6. On change request, set `parsed_note.status=changes_requested`, retain the feedback, update the same document, increment the revision, and notify again.
+3. Insert a visible `🟡 审核状态：待审核` marker at the top of the Feishu document.
+4. Send a Feishu message titled `标准解析稿待审核` with the document link.
+5. Wait for an explicit approve or change-request command from the configured reviewer.
+6. On approval, set `parsed_note.status=approved`, update the document marker to `✅ 审核状态：已通过`, and start both derivative generators.
+7. On change request, set `parsed_note.status=changes_requested`, update the marker to `⚠️ 审核状态：需修改`, retain the feedback, revise the same document, increment the revision, and notify again.
 
 ## Review Checklist
 
