@@ -1,0 +1,10 @@
+# Private diary processing workspace.
+entries/
+
+# Local media files should stay outside the repository.
+*.m4a
+*.mp3
+*.wav
+*.mp4
+*.mov
+

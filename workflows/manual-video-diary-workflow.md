@@ -28,6 +28,26 @@ Optional:
 - People mentioned
 - Content goal
 
+## Configured Locations
+
+Current local recording folder:
+
+```text
+/Users/wuyanyu/Desktop/每日感想录音记录
+```
+
+Current Feishu final output destination:
+
+```text
+https://jp09qsvu8c.feishu.cn/wiki/YCRZwOZ8GibC7pkt9L1cHh8enXf?fromScene=spaceOverview
+```
+
+For each processed diary, create a new child document under the Feishu wiki destination and name it with the entry date, for example:
+
+```text
+2026-08-24
+```
+
 ## Folder Convention
 
 For local work, use this structure:
@@ -202,4 +222,3 @@ LifeOS AI / 06 Content Studio
 - [ ] Final journal assembled
 - [ ] Feishu document created or updated
 - [ ] Sensitive details removed from public content
-
