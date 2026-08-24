@@ -3,6 +3,7 @@ entries/
 .models/
 .DS_Store
 .runtime/
+__pycache__/
 
 # Local media files should stay outside the repository.
 *.m4a
