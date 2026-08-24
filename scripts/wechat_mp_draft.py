@@ -8,6 +8,7 @@ import json
 import mimetypes
 import os
 import re
+import ssl
 import subprocess
 import sys
 import urllib.error
@@ -21,6 +22,14 @@ from pathlib import Path
 STABLE_TOKEN_URL = "https://api.weixin.qq.com/cgi-bin/stable_token"
 MATERIAL_URL = "https://api.weixin.qq.com/cgi-bin/material/add_material"
 DRAFT_URL = "https://api.weixin.qq.com/cgi-bin/draft/add"
+
+
+def tls_context() -> ssl.SSLContext:
+    try:
+        import certifi
+    except ImportError:
+        return ssl.create_default_context()
+    return ssl.create_default_context(cafile=certifi.where())
 
 
 class WeChatAPIError(RuntimeError):
@@ -65,7 +74,9 @@ def request_json(
         request_headers.setdefault("Content-Type", "application/json; charset=utf-8")
     request = urllib.request.Request(url, data=data, headers=request_headers)
     try:
-        with urllib.request.urlopen(request, timeout=30) as response:
+        with urllib.request.urlopen(
+            request, timeout=30, context=tls_context()
+        ) as response:
             result = json.loads(response.read().decode("utf-8"))
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
         raise WeChatAPIError(f"WeChat request failed: {error}") from error
@@ -172,7 +183,9 @@ def upload_permanent_cover(access_token: str, cover_path: Path) -> str:
         headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
     )
     try:
-        with urllib.request.urlopen(request, timeout=60) as response:
+        with urllib.request.urlopen(
+            request, timeout=60, context=tls_context()
+        ) as response:
             result = json.loads(response.read().decode("utf-8"))
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
         raise WeChatAPIError(f"Cover upload failed: {error}") from error
