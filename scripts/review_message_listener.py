@@ -22,10 +22,22 @@ STAGE_KEYS = {
     "视频脚本": "video_script",
     "公众号文章": "wechat_article",
 }
+STAGE_LABELS = {value: key for key, value in STAGE_KEYS.items()}
+
+
+def normalize_review_content(content: str) -> str:
+    """Normalize text copied from Feishu reminders before command parsing."""
+    return (
+        content.replace("\\r\\n", "\n")
+        .replace("\\n", "\n")
+        .replace("\u200b", "")
+        .replace("\u00a0", " ")
+        .strip()
+    )
 
 
 def parse_review_command(content: str) -> dict[str, str] | None:
-    match = COMMAND_RE.match(content.strip())
+    match = COMMAND_RE.match(normalize_review_content(content))
     if not match:
         return None
     decision, entry_key, label, comment = match.groups()
@@ -114,6 +126,56 @@ def append_action(actions_path: Path, payload: dict) -> None:
         handle.write(json.dumps(payload, ensure_ascii=False) + "\n")
 
 
+def build_acknowledgement(command: dict[str, str], result: dict) -> str:
+    label = STAGE_LABELS[command["stage"]]
+    entry_key = command["entry_key"]
+    if command["decision"] == "changes_requested":
+        return (
+            f"审核意见已收到：{entry_key} {label}需要修改。\n"
+            "系统只会修改当前分支，完成后会重新发送待审核提醒。"
+        )
+    if result["action"] == "generate_derivatives":
+        return (
+            f"审核已记录：{entry_key} 标准解析稿已通过。\n"
+            "视频脚本和公众号文章已进入生成队列，系统将在下一轮自动处理。"
+        )
+    if result["action"] == "complete_entry":
+        return (
+            f"审核已记录：{entry_key} {label}已通过。\n"
+            "视频脚本与公众号文章均已通过，本条 LifeOS 流程已完成。"
+        )
+    return (
+        f"审核已记录：{entry_key} {label}已通过。\n"
+        "另一项内容仍在等待审核。"
+    )
+
+
+def send_acknowledgement(
+    profile: str, reviewer_open_id: str, message_id: str, text: str
+) -> None:
+    subprocess.run(
+        [
+            "lark-cli",
+            "im",
+            "+messages-send",
+            "--profile",
+            profile,
+            "--as",
+            "bot",
+            "--user-id",
+            reviewer_open_id,
+            "--idempotency-key",
+            f"lifeos-ack-{message_id[-20:]}",
+            "--text",
+            text,
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+
+
 def sync_feishu_review_status(
     state: dict, stage: str, decision: str, comment: str, profile: str
 ) -> None:
@@ -157,6 +219,7 @@ def handle_event(
     actions_path: Path,
     reviewer_open_id: str,
     profile: str = "siyangyuan-tiantu",
+    send_notifications: bool = True,
 ) -> dict | None:
     if event.get("type") != "im.message.receive_v1":
         return None
@@ -195,6 +258,16 @@ def handle_event(
                 "message_id": event.get("message_id"),
             },
         )
+        if send_notifications:
+            try:
+                send_acknowledgement(
+                    profile,
+                    reviewer_open_id,
+                    str(event.get("message_id", "unknown")),
+                    build_acknowledgement(command, result),
+                )
+            except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
+                print(f"feishu_ack_error: {error}", file=sys.stderr, flush=True)
     return result
 
 
@@ -202,6 +275,7 @@ def run_listener(args: argparse.Namespace) -> int:
     config = load_json(args.config)
     reviewer_open_id = config["reviewer_open_id"]
     profile = config.get("profile", "siyangyuan-tiantu")
+    send_notifications = config.get("send_notifications", True)
     command = [
         "lark-cli",
         "event",
@@ -233,6 +307,7 @@ def run_listener(args: argparse.Namespace) -> int:
                 args.actions_path,
                 reviewer_open_id,
                 profile,
+                send_notifications,
             )
             if result:
                 print(json.dumps(result, ensure_ascii=False), flush=True)
