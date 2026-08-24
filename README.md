@@ -38,6 +38,17 @@ LifeOS AI 是一个面向个人成长、记忆沉淀和内容复用的 AI 系统
 │   ├── cognition-challenge-agent.md
 │   ├── memory-agent.md
 │   └── content-generator-agent.md
+├── workflows/
+│   └── manual-video-diary-workflow.md
+├── templates/
+│   ├── source-notes-template.md
+│   ├── daily-journal-template.md
+│   └── memory-card-template.md
+├── schemas/
+│   └── diary-entry.schema.json
+├── examples/
+│   ├── sample-diary-entry.json
+│   └── sample-final-journal.md
 ├── roadmap/
 │   └── product-roadmap.md
 └── decisions/
@@ -58,5 +69,15 @@ LifeOS AI 是一个面向个人成长、记忆沉淀和内容复用的 AI 系统
 
 ## 版本状态
 
-当前处于 `v0.1` 产品定义阶段。优先把问题定义、信息架构和 Agent 协作方式写清楚，再进入最小可运行原型开发。
+当前处于 `v0.2` 手工工作流原型阶段。优先用真实或模拟的视频日记转写文本跑通一次完整闭环，再进入本地自动化开发。
 
+## v0.2 本地使用方式
+
+1. 阅读 `workflows/manual-video-diary-workflow.md`。
+2. 为一条日记创建本地 `entries/YYYY-MM-DD-title/` 目录。
+3. 复制 `templates/source-notes-template.md` 和 `templates/daily-journal-template.md`。
+4. 粘贴视频或音频转写文本。
+5. 依次运行四个 Agent Prompt。
+6. 生成 `final-journal.md`，必要时手动归档到飞书。
+
+注意：`entries/` 默认不纳入仓库初始化，因为真实日记内容通常包含隐私。

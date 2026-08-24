@@ -1,0 +1,267 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/wuyanyu1986/LifeOS-AI/schemas/diary-entry.schema.json",
+  "title": "LifeOS AI Diary Entry",
+  "type": "object",
+  "required": [
+    "entry_id",
+    "date",
+    "title",
+    "source",
+    "summary",
+    "events",
+    "emotions",
+    "insights",
+    "action_items",
+    "memory_candidates",
+    "content_candidates"
+  ],
+  "properties": {
+    "entry_id": {
+      "type": "string",
+      "description": "Stable entry identifier, usually YYYY-MM-DD-slug."
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "title": {
+      "type": "string"
+    },
+    "source": {
+      "type": "object",
+      "required": ["type", "reference", "privacy_level"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["video", "audio", "transcript", "text_note"]
+        },
+        "reference": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string"
+        },
+        "privacy_level": {
+          "type": "string",
+          "enum": ["private", "limited", "public-safe"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "related_projects": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "summary": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/event"
+      }
+    },
+    "people": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/person"
+      }
+    },
+    "emotions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/emotion"
+      }
+    },
+    "insights": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cognitive_challenge": {
+      "type": "object",
+      "properties": {
+        "possible_patterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reflection_questions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "small_experiments": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "action_items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/action_item"
+      }
+    },
+    "memory_candidates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/memory_candidate"
+      }
+    },
+    "content_candidates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/content_candidate"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "event": {
+      "type": "object",
+      "required": ["title", "description"],
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "time_hint": {
+          "type": "string"
+        },
+        "related_people": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "related_projects": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "person": {
+      "type": "object",
+      "required": ["name", "role_or_relation"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "role_or_relation": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "emotion": {
+      "type": "object",
+      "required": ["label", "intensity", "evidence"],
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "intensity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "evidence": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "action_item": {
+      "type": "object",
+      "required": ["action", "status"],
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "due_date": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["todo", "doing", "done", "dropped"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "memory_candidate": {
+      "type": "object",
+      "required": ["type", "content", "confidence", "review_required"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["person", "project", "goal", "preference", "lesson", "decision", "risk", "habit"]
+        },
+        "content": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "string",
+          "enum": ["low", "medium", "high"]
+        },
+        "review_required": {
+          "type": "boolean"
+        },
+        "source_quote": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "content_candidate": {
+      "type": "object",
+      "required": ["format", "core_idea", "privacy_review_required"],
+      "properties": {
+        "format": {
+          "type": "string",
+          "enum": ["article", "short_video", "podcast", "social_post", "reflection_card"]
+        },
+        "core_idea": {
+          "type": "string"
+        },
+        "draft_reference": {
+          "type": "string"
+        },
+        "privacy_review_required": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
+
