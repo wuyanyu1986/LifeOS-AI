@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lifeos.local/schemas/review-state.schema.json",
+  "title": "LifeOS Diary Review State",
+  "type": "object",
+  "required": [
+    "entry_date",
+    "parsed_note",
+    "video_script",
+    "wechat_article",
+    "pipeline_status"
+  ],
+  "properties": {
+    "entry_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "pipeline_status": {
+      "enum": [
+        "parsed_pending_review",
+        "parsed_changes_requested",
+        "generating_derivatives",
+        "derivatives_pending_review",
+        "completed",
+        "failed"
+      ]
+    },
+    "parsed_note": {
+      "$ref": "#/$defs/reviewableOutput"
+    },
+    "video_script": {
+      "$ref": "#/$defs/reviewableOutput"
+    },
+    "wechat_article": {
+      "$ref": "#/$defs/reviewableOutput"
+    }
+  },
+  "$defs": {
+    "reviewableOutput": {
+      "type": "object",
+      "required": ["status", "revision", "notification_status"],
+      "properties": {
+        "wiki_node_token": {
+          "type": ["string", "null"]
+        },
+        "doc_token": {
+          "type": ["string", "null"]
+        },
+        "status": {
+          "enum": [
+            "not_created",
+            "pending_review",
+            "approved",
+            "changes_requested",
+            "superseded"
+          ]
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "notification_status": {
+          "enum": ["not_sent", "sent", "failed"]
+        },
+        "notification_message_id": {
+          "type": ["string", "null"]
+        },
+        "reviewer_open_id": {
+          "type": ["string", "null"]
+        },
+        "reviewed_at": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "review_comment": {
+          "type": ["string", "null"]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

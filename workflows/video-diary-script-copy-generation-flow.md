@@ -15,6 +15,14 @@ audio recording
 
 Do not skip the standard parsed note unless the user explicitly asks for a quick draft.
 
+Hard prerequisite:
+
+```text
+parsed_note.status = approved
+```
+
+If the parsed note is pending review or has changes requested, stop without generating a script.
+
 ## Input
 
 Required:
@@ -147,6 +155,17 @@ lark-cli docs +create \
 
 For a process/spec document, create it under the sample video script node or the project process node.
 
+## Review Notification
+
+After the document is created or revised:
+
+1. Set `video_script.status=pending_review`.
+2. Send a dedicated `视频脚本待审核` Feishu message with the document link and revision.
+3. Do not treat article approval as video approval.
+4. On a change request, update only the video script and send a new reminder.
+
+Use `workflows/video-script-review.md` for the review contract.
+
 ## Quality Checklist
 
 - [ ] Script is first-person.
@@ -158,4 +177,5 @@ For a process/spec document, create it under the sample video script node or the
 - [ ] Publishing copy is included.
 - [ ] Title options are included.
 - [ ] Shooting notes include privacy handling.
-
+- [ ] Video review reminder sent exactly once per revision.
+- [ ] Video approval recorded independently.

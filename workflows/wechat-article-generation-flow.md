@@ -14,6 +14,14 @@ audio recording
 
 The article and video script are parallel outputs. Generate each directly from the standard parsed note so that one derivative does not distort the other.
 
+Hard prerequisite:
+
+```text
+parsed_note.status = approved
+```
+
+If the parsed note is pending review or has changes requested, stop without generating an article.
+
 ## Required Input
 
 - Standard parsed note
@@ -77,6 +85,17 @@ lark-cli docs +create \
   --markdown @entries/YYYY-MM-DD-daily-reflection/wechat-article.md
 ```
 
+## Review Notification
+
+After the document is created or revised:
+
+1. Set `wechat_article.status=pending_review`.
+2. Send a dedicated `公众号文章待审核` Feishu message with the document link and revision.
+3. Do not treat video approval as article approval.
+4. On a change request, update only the article and send a new reminder.
+
+Use `workflows/wechat-article-review.md` for the review contract.
+
 ## Quality Checklist
 
 - [ ] The body is approximately 1800-2200 Chinese characters.
@@ -87,3 +106,5 @@ lark-cli docs +create \
 - [ ] The tone remains first-person and restrained.
 - [ ] Privacy-sensitive details are minimized.
 - [ ] Alternate titles and cover summary are included.
+- [ ] Article review reminder sent exactly once per revision.
+- [ ] Article approval recorded independently.

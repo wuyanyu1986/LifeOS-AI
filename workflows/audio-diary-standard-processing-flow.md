@@ -182,6 +182,18 @@ lark-cli docs +fetch \
   --format pretty
 ```
 
+## Step 8: Enter Parsed-Note Review
+
+Do not generate a video script or WeChat article immediately after archiving.
+
+The Wiki scanner must detect the new `YYYY-MM-DD` node, create a review-state record, and send a `标准解析稿待审核` Feishu message. Continue only after:
+
+```text
+parsed_note.status = approved
+```
+
+Use `workflows/standard-parsed-note-review.md` and `workflows/review-gated-diary-orchestration.md` for the review contract.
+
 ## Quality Checklist
 
 - [ ] Audio file found
@@ -194,4 +206,5 @@ lark-cli docs +fetch \
 - [ ] 待办事项 only includes explicit actions
 - [ ] Feishu child document created
 - [ ] Feishu output verified
-
+- [ ] Parsed-note review reminder sent exactly once
+- [ ] Parsed note explicitly approved before downstream generation
