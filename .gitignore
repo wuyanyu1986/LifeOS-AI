@@ -2,6 +2,7 @@
 entries/
 .models/
 .DS_Store
+.runtime/
 
 # Local media files should stay outside the repository.
 *.m4a

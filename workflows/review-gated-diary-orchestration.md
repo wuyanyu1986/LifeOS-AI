@@ -27,7 +27,7 @@ Poll the direct children of Wiki root `YCRZwOZ8GibC7pkt9L1cHh8enXf` every 60 sec
 Accept a node only when:
 
 - `obj_type` is `docx`;
-- title matches `YYYY-MM-DD`;
+- title matches `YYYY-MM-DD` or `YYYY-MM-DD-N` for multiple recordings on the same date;
 - its `node_token` is not in the local review registry.
 
 The scanner is the source of detection, not the source of approval.
