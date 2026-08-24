@@ -1,5 +1,6 @@
 # Private diary processing workspace.
 entries/
+.models/
 
 # Local media files should stay outside the repository.
 *.m4a
@@ -7,4 +8,3 @@ entries/
 *.wav
 *.mp4
 *.mov
-

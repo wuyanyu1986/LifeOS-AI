@@ -53,11 +53,20 @@ Local recording folder:
 
 Feishu wiki destination:
 
-- Status: blocked
-- Reason: current `lark-cli` identity is bot only, and the wiki API returned `node permission denied`.
-- Required next step: authorize user identity with at least `wiki:node:read`, then retry node lookup.
+- Status: readable and writable
+- Checked profile: `siyangyuan-tiantu`
+- Checked user: 饲养员本员
+- Wiki title: 每日成长
+- Wiki node token: `YCRZwOZ8GibC7pkt9L1cHh8enXf`
+- Wiki space ID: `7618037226496543945`
+
+Created document for the first processed entry:
+
+```text
+2026-08-24
+https://jp09qsvu8c.feishu.cn/wiki/UvW0wnogNisxYpkCtXtcMArangb
+```
 
 ## Privacy Rule
 
 Real diary transcripts and final local journal drafts should be created under local `entries/` and remain ignored by Git. Only reusable templates, schemas, workflows, and non-private examples should be committed.
-
