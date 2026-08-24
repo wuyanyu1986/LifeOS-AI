@@ -1,6 +1,7 @@
 # Private diary processing workspace.
 entries/
 .models/
+.DS_Store
 
 # Local media files should stay outside the repository.
 *.m4a
