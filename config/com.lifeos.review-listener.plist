@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.lifeos.review-listener</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Library/Frameworks/Python.framework/Versions/3.14/bin/python3</string>
+    <string>/Users/wuyanyu/Library/Application Support/LifeOS-AI/review_message_listener.py</string>
+    <string>--config</string>
+    <string>/Users/wuyanyu/Library/Application Support/LifeOS-AI/review-listener-config.json</string>
+    <string>--entries-dir</string>
+    <string>/Users/wuyanyu/Documents/ChatGPT/LifeOS-AI/entries</string>
+    <string>--actions-path</string>
+    <string>/Users/wuyanyu/Library/Application Support/LifeOS-AI/review-actions.ndjson</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/wuyanyu/Documents/ChatGPT/LifeOS-AI</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/Users/wuyanyu/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+
+  <key>StandardOutPath</key>
+  <string>/Users/wuyanyu/Library/Application Support/LifeOS-AI/review-listener.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/wuyanyu/Library/Application Support/LifeOS-AI/review-listener.error.log</string>
+</dict>
+</plist>
