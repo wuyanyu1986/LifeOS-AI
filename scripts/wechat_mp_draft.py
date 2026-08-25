@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import mimetypes
 import os
@@ -254,7 +255,29 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--env-file", type=Path)
     parser.add_argument("--author", default="")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--browser-package",
+        type=Path,
+        help="Write a validated local package for browser-assisted draft creation.",
+    )
     return parser
+
+
+def browser_package(
+    article: Article, author: str, article_path: Path, cover_path: Path
+) -> dict:
+    payload = {
+        "version": 1,
+        "title": article.title,
+        "author": author,
+        "digest": article.digest,
+        "html": article.html,
+        "article_path": str(article_path.resolve()),
+        "cover_square_path": str(cover_path.resolve()),
+    }
+    canonical = json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    payload["fingerprint"] = hashlib.sha256(canonical).hexdigest()
+    return payload
 
 
 def main() -> int:
@@ -263,6 +286,24 @@ def main() -> int:
     article = extract_article(args.article)
     validate_cover(args.cover_square)
     author = args.author or os.environ.get("WECHAT_MP_AUTHOR", "")
+    if args.browser_package:
+        package = browser_package(article, author, args.article, args.cover_square)
+        args.browser_package.parent.mkdir(parents=True, exist_ok=True)
+        args.browser_package.write_text(
+            json.dumps(package, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        print(
+            json.dumps(
+                {
+                    "ok": True,
+                    "mode": "browser",
+                    "package": str(args.browser_package),
+                    "fingerprint": package["fingerprint"],
+                },
+                ensure_ascii=False,
+            )
+        )
+        return 0
     if args.dry_run:
         payload = build_draft_payload(article, author, "DRY_RUN_MEDIA_ID")
         print(

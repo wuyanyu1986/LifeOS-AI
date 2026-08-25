@@ -22,7 +22,10 @@
 | `generating_derivatives` | Parsed-note approval | Both generation jobs settle |
 | `derivatives_pending_review` | A derivative is created | Both derivatives approved |
 | `preparing_wechat_draft` | WeChat article approval | Draft created or configuration blocked |
-| `wechat_draft_configuration_required` | Missing local WeChat credentials | Configuration supplied and retried |
+| `wechat_draft_login_required` | Local browser session expired | Owner completes QR login |
+| `wechat_draft_interaction_required` | CAPTCHA or account security challenge | Owner completes the challenge |
+| `wechat_draft_save_confirmation_required` | Editor is fully populated | Owner confirms save action |
+| `wechat_draft_save_verification_required` | Save result is ambiguous | Draft list is reconciled |
 | `wechat_draft_pending_review` | WeChat draft created | Manual review and publication in WeChat |
 | `completed` | Legacy entries only | Terminal |
 | `failed` | Permanent processing failure | Manual retry or repair |

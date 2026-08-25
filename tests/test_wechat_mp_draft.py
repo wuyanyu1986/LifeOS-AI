@@ -2,7 +2,12 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.wechat_mp_draft import Article, build_draft_payload, extract_article
+from scripts.wechat_mp_draft import (
+    Article,
+    browser_package,
+    build_draft_payload,
+    extract_article,
+)
 
 
 class WeChatMPDraftTest(unittest.TestCase):
@@ -46,6 +51,20 @@ class WeChatMPDraftTest(unittest.TestCase):
         }
         self.assertEqual(article["thumb_media_id"], "media-id")
         self.assertEqual(ratios, {"2.35_1", "1_1"})
+
+    def test_browser_package_has_stable_fingerprint_and_absolute_paths(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            article_path = root / "article.md"
+            cover_path = root / "cover.png"
+            article_path.touch()
+            cover_path.touch()
+            article = Article("标题", "摘要", "<p>正文</p>")
+            first = browser_package(article, "作者", article_path, cover_path)
+            second = browser_package(article, "作者", article_path, cover_path)
+            self.assertEqual(first["fingerprint"], second["fingerprint"])
+            self.assertTrue(Path(first["article_path"]).is_absolute())
+            self.assertTrue(Path(first["cover_square_path"]).is_absolute())
 
 
 if __name__ == "__main__":

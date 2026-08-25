@@ -1,6 +1,6 @@
 # WeChat Official Account Draft Publishing Flow
 
-**Version**: 0.1
+**Version**: 0.2
 **Status**: Review
 **Trigger**: `wechat_article.status=approved`
 
@@ -17,8 +17,10 @@ wechat_article approved
   -> preparing_wechat_draft
   -> generate cover master and wide preview
   -> render Markdown as WeChat-safe HTML
-  -> upload permanent cover material
-  -> create draft
+  -> prepare a browser package
+  -> open mp.weixin.qq.com and wait for login when required
+  -> fill the editor and upload the cover
+  -> save one draft after explicit confirmation
   -> wechat_draft_pending_review
   -> notify owner to review in mp.weixin.qq.com
   -> manual edit or manual publish
@@ -47,51 +49,50 @@ The square master must remain meaningful in both crops:
 
 Use `prompts/wechat-cover-generator.md` for image generation.
 
-## Draft Creation
+## Default Draft Creation: Local Browser
 
-Run a validation preview first:
+Prepare a validated browser package first:
 
 ```bash
 python3 scripts/wechat_mp_draft.py \
   --article entries/ENTRY/wechat-article.md \
   --cover-square entries/ENTRY/wechat-cover-square.png \
   --env-file "/Users/wuyanyu/Library/Application Support/LifeOS-AI/wechat-mp.env" \
-  --dry-run
+  --browser-package entries/ENTRY/wechat-browser-package.json
 ```
 
-After validation, remove `--dry-run`. The client:
+The browser runner then:
 
-1. Gets a stable access token using a server-side POST request.
-2. Uploads the square cover as permanent image material.
-3. Uses the returned `media_id` as `thumb_media_id`.
-4. Creates one `news` item in the draft box.
-5. Returns only material and draft IDs; it never prints credentials or tokens.
+1. Opens `https://mp.weixin.qq.com/` in the local browser.
+2. If the session is expired, sets `login_required`, leaves the page visible, and
+   waits for the owner to scan the QR code. It never reads or stores credentials.
+3. Opens a new single-article graphic draft and fills title, author, digest, and
+   approved body content from the package.
+4. Uploads the 900x900 cover and verifies both the 2.35:1 and 1:1 previews.
+5. Stops immediately before the final `save as draft` action and requests explicit
+   confirmation because saving creates external account content.
+6. After confirmation, saves exactly once and verifies a success toast or the
+   draft-list entry before setting `pending_review`.
 
-## Configuration Gate
+Never infer success from a click alone. A CAPTCHA or account security challenge
+sets `wechat_draft_interaction_required` and is handled only by the owner.
 
-Credentials must exist only in:
+## API Fallback
 
-```text
-/Users/wuyanyu/Library/Application Support/LifeOS-AI/wechat-mp.env
-```
+`scripts/wechat_mp_draft.py --dry-run` and the direct API mode remain available
+for a future fixed-egress environment. They are not the default on a dynamic home
+IP and must not be retried automatically after error 40164.
 
-Required values:
+## Browser Login Gate
 
-```text
-WECHAT_MP_APP_ID=...
-WECHAT_MP_APP_SECRET=...
-WECHAT_MP_AUTHOR=...
-```
+Only `WECHAT_MP_AUTHOR` is read from the local env file in browser mode. AppID and
+AppSecret are unnecessary. When login is required:
 
-The file must be mode `600`. The calling IP must be accepted by the WeChat account
-when the platform requires administrator confirmation or an IP allowlist.
-
-When configuration is absent:
-
-- set `wechat_mp_draft.status=configuration_required`;
-- set `pipeline_status=wechat_draft_configuration_required`;
-- preserve the generated cover and rendered article;
-- notify once, without repeated retries or duplicate drafts.
+- set `wechat_mp_draft.status=login_required`;
+- set `pipeline_status=wechat_draft_login_required`;
+- preserve the package, cover, and article;
+- notify once and keep the login tab available;
+- resume only after the authenticated dashboard is visible.
 
 ## Success Notification
 
@@ -108,8 +109,12 @@ Send one Feishu message:
 
 ## Idempotency
 
-- If `draft_media_id` already exists for the same article revision, do not call
-  `draft/add` again.
+- Store `browser_package_fingerprint` before opening the editor.
+- If the same fingerprint has status `pending_review`, do not create another draft.
+- While status is `editing` or `save_confirmation_required`, resume the existing
+  editor tab; do not open a new draft.
+- A save timeout is `save_verification_required`, not success. Inspect the draft
+  list before any retry.
 - A revised approved article increments the draft revision and updates or replaces
   only the WeChat draft branch.
 - Persist API errors without secrets, access tokens, or raw credential responses.
@@ -119,6 +124,7 @@ Send one Feishu message:
 1. Pending or rejected articles never create a WeChat draft.
 2. Article approval queues `prepare_wechat_draft` even when video review is pending.
 3. Both official crop ratios are included.
-4. Missing credentials create a visible configuration gate, not a false success.
+4. An expired login creates a visible login gate, not a false success.
 5. Reprocessing the same action does not create a duplicate draft.
 6. Success produces one Feishu review reminder and never publishes the article.
+7. CAPTCHA and security prompts stop for owner interaction.

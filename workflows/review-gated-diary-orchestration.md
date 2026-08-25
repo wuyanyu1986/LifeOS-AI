@@ -17,7 +17,7 @@ Require explicit human approval of the standard parsed note before generating de
 | Feishu bot | Send reminders and receive review commands |
 | Reviewer | Approve or request changes |
 | Content generators | Create video and article drafts after approval |
-| WeChat draft publisher | Create a cover and copy an approved article to the draft box |
+| WeChat draft publisher | Create a cover and copy an approved article through the local browser |
 
 ## Trigger Strategy
 
@@ -51,7 +51,9 @@ new parsed note detected
      -> video approved independently
      -> article approved independently
         -> preparing_wechat_draft
-        -> create cover and WeChat draft
+        -> create cover and browser package
+        -> owner scans QR if login expired
+        -> populate editor and confirm save
         -> wechat_draft_pending_review
         -> owner reviews and publishes manually in WeChat
 ```
@@ -99,8 +101,9 @@ Every reminder must contain the date, content type, document link, revision, cur
 | Parsed note fetch fails | Mark processing failure and retry; do not generate content |
 | Reminder send fails | Keep content pending review and retry notification |
 | One derivative fails | Preserve the successful sibling; retry only the failed branch |
-| WeChat credentials missing | Preserve the cover and article; notify once and wait for local configuration |
-| WeChat draft API fails | Persist a sanitized error; retry without creating duplicates |
+| Browser login expired | Preserve the package; notify once and wait for QR login |
+| CAPTCHA or security prompt | Stop for owner interaction; never bypass it |
+| Draft save result ambiguous | Reconcile against the draft list before any retry |
 | Invalid reviewer command | Keep existing state and send syntax guidance |
 | Concurrent approvals | First valid transition wins; later duplicates are idempotent |
 

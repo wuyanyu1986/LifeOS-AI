@@ -22,7 +22,10 @@
         "generating_derivatives",
         "derivatives_pending_review",
         "preparing_wechat_draft",
-        "wechat_draft_configuration_required",
+        "wechat_draft_login_required",
+        "wechat_draft_interaction_required",
+        "wechat_draft_save_confirmation_required",
+        "wechat_draft_save_verification_required",
         "wechat_draft_pending_review",
         "ready_for_manual_publish",
         "completed",
@@ -51,7 +54,11 @@
           "enum": [
             "not_created",
             "preparing",
-            "configuration_required",
+            "login_required",
+            "interaction_required",
+            "editing",
+            "save_confirmation_required",
+            "save_verification_required",
             "pending_review",
             "ready_for_manual_publish",
             "failed"
@@ -65,6 +72,15 @@
           "type": ["string", "null"]
         },
         "cover_square_path": {
+          "type": ["string", "null"]
+        },
+        "browser_package_path": {
+          "type": ["string", "null"]
+        },
+        "browser_package_fingerprint": {
+          "type": ["string", "null"]
+        },
+        "editor_url": {
           "type": ["string", "null"]
         },
         "cover_media_id": {

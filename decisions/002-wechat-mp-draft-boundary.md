@@ -8,6 +8,11 @@ After a LifeOS WeChat article is approved in Feishu, the system may generate a
 cover and create a WeChat Official Account draft. It may not publish, mass-send,
 schedule, or delete WeChat content.
 
+The default draft-creation path is local browser automation. Direct API creation
+is a fallback for a future environment with stable, allowlisted public egress.
+Browser automation must stop for QR login, CAPTCHA, security challenges, and the
+final save confirmation.
+
 ## Reason
 
 The WeChat backend is the final place where the account owner can inspect platform
@@ -19,4 +24,5 @@ becoming a public post.
 
 `wechat_article.status=approved` is no longer the end of the article branch. The
 terminal automated state is `wechat_draft_pending_review`; publication remains a
-manual external action.
+manual external action. The browser package fingerprint and verified save result
+form the duplicate-prevention boundary.
