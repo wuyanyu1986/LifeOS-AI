@@ -21,12 +21,6 @@
         "parsed_changes_requested",
         "generating_derivatives",
         "derivatives_pending_review",
-        "preparing_wechat_draft",
-        "wechat_draft_login_required",
-        "wechat_draft_interaction_required",
-        "wechat_draft_save_confirmation_required",
-        "wechat_draft_save_verification_required",
-        "wechat_draft_pending_review",
         "ready_for_manual_publish",
         "completed",
         "failed"
@@ -40,71 +34,9 @@
     },
     "wechat_article": {
       "$ref": "#/$defs/reviewableOutput"
-    },
-    "wechat_mp_draft": {
-      "$ref": "#/$defs/wechatMpDraft"
     }
   },
   "$defs": {
-    "wechatMpDraft": {
-      "type": "object",
-      "required": ["status", "revision", "notification_status"],
-      "properties": {
-        "status": {
-          "enum": [
-            "not_created",
-            "preparing",
-            "login_required",
-            "interaction_required",
-            "editing",
-            "save_confirmation_required",
-            "save_verification_required",
-            "pending_review",
-            "ready_for_manual_publish",
-            "failed"
-          ]
-        },
-        "revision": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "cover_path": {
-          "type": ["string", "null"]
-        },
-        "cover_square_path": {
-          "type": ["string", "null"]
-        },
-        "browser_package_path": {
-          "type": ["string", "null"]
-        },
-        "browser_package_fingerprint": {
-          "type": ["string", "null"]
-        },
-        "editor_url": {
-          "type": ["string", "null"]
-        },
-        "cover_media_id": {
-          "type": ["string", "null"]
-        },
-        "draft_media_id": {
-          "type": ["string", "null"]
-        },
-        "created_at": {
-          "type": ["string", "null"],
-          "format": "date-time"
-        },
-        "notification_status": {
-          "enum": ["not_sent", "sent", "failed"]
-        },
-        "notification_message_id": {
-          "type": ["string", "null"]
-        },
-        "last_error": {
-          "type": ["string", "null"]
-        }
-      },
-      "additionalProperties": false
-    },
     "reviewableOutput": {
       "type": "object",
       "required": ["status", "revision", "notification_status"],

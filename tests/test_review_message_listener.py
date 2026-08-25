@@ -36,7 +36,7 @@ class ReviewMessageListenerTest(unittest.TestCase):
             },
         )
 
-    def test_article_approval_acknowledgement_starts_mp_draft(self):
+    def test_all_reviews_completed_acknowledgement_is_manual(self):
         acknowledgement = build_acknowledgement(
             {
                 "decision": "approved",
@@ -44,12 +44,12 @@ class ReviewMessageListenerTest(unittest.TestCase):
                 "stage": "wechat_article",
                 "comment": "",
             },
-            {"action": "prepare_wechat_draft"},
+            {"action": "all_reviews_completed"},
         )
-        self.assertIn("微信公众号草稿", acknowledgement)
-        self.assertIn("进入队列", acknowledgement)
+        self.assertIn("均已通过", acknowledgement)
+        self.assertIn("手工写入", acknowledgement)
 
-    def test_article_approval_queues_wechat_draft(self):
+    def test_article_approval_completes_reviews_without_draft_branch(self):
         with tempfile.TemporaryDirectory() as directory:
             state_path = Path(directory) / "review-state.json"
             state_path.write_text(
@@ -79,11 +79,10 @@ class ReviewMessageListenerTest(unittest.TestCase):
                 "ou_reviewer",
             )
             state = json.loads(state_path.read_text(encoding="utf-8"))
-            self.assertEqual(result["action"], "prepare_wechat_draft")
-            self.assertEqual(state["pipeline_status"], "preparing_wechat_draft")
-            self.assertEqual(state["wechat_mp_draft"]["status"], "preparing")
+            self.assertEqual(result["action"], "all_reviews_completed")
+            self.assertEqual(state["pipeline_status"], "ready_for_manual_publish")
 
-    def test_video_approval_waits_for_wechat_draft(self):
+    def test_video_approval_completes_reviews_when_article_is_approved(self):
         acknowledgement = build_acknowledgement(
             {
                 "decision": "approved",
@@ -91,9 +90,9 @@ class ReviewMessageListenerTest(unittest.TestCase):
                 "stage": "video_script",
                 "comment": "",
             },
-            {"action": "wait_for_wechat_draft"},
+            {"action": "all_reviews_completed"},
         )
-        self.assertIn("公众号草稿分支", acknowledgement)
+        self.assertIn("手工写入", acknowledgement)
 
     def test_parsed_approval_queues_derivative_generation(self):
         with tempfile.TemporaryDirectory() as directory:
