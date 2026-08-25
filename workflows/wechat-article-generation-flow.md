@@ -10,9 +10,13 @@ audio recording
   -> standard parsed note
      -> video script and copy
      -> WeChat article
+     -> social cover visual brief
 ```
 
-The article and video script are parallel outputs. Generate each directly from the standard parsed note so that one derivative does not distort the other.
+The article, video script, and social-cover brief are parallel outputs. Generate
+each directly from the standard parsed note so that one derivative does not
+distort the other. The cover branch waits for the article metadata before final
+image generation.
 
 Hard prerequisite:
 
@@ -70,7 +74,8 @@ Check every concrete claim against the parsed note or transcript. Remove or soft
 
 ## Step 6: Add Publishing Metadata
 
-Add three to five alternate titles and a 60-100 character cover summary. Do not add engagement bait unless explicitly requested.
+Add three to five alternate titles, a one-sentence `核心观点`, and a 60-100
+character cover summary. Do not add engagement bait unless explicitly requested.
 
 ## Feishu Creation
 
@@ -106,5 +111,6 @@ Use `workflows/wechat-article-review.md` for the review contract.
 - [ ] The tone remains first-person and restrained.
 - [ ] Privacy-sensitive details are minimized.
 - [ ] Alternate titles and cover summary are included.
+- [ ] One machine-readable `核心观点` is included for the cover branch.
 - [ ] Article review reminder sent exactly once per revision.
 - [ ] Article approval recorded independently.

@@ -72,6 +72,18 @@ def find_review_state(entries_dir: Path, entry_key: str) -> Path | None:
     return exact if exact.exists() else None
 
 
+def cover_assets_ready(state: dict) -> bool:
+    """Treat entries created before the cover branch as legacy-complete."""
+    cover_state = state.get("cover_assets")
+    if not cover_state:
+        return True
+    return (
+        cover_state.get("status") == "archived"
+        and cover_state.get("source_article_revision")
+        == state["wechat_article"].get("revision")
+    )
+
+
 def apply_review_command(
     state_path: Path, command: dict[str, str], reviewer_open_id: str
 ) -> dict:
@@ -105,10 +117,18 @@ def apply_review_command(
     elif stage == "wechat_article":
         if decision == "changes_requested":
             state["pipeline_status"] = "derivatives_pending_review"
+            if state.get("cover_assets"):
+                state["cover_assets"]["status"] = "superseded"
             action = "revise_wechat_article"
-        elif state["video_script"]["status"] == "approved":
+        elif (
+            state["video_script"]["status"] == "approved"
+            and cover_assets_ready(state)
+        ):
             state["pipeline_status"] = "ready_for_manual_publish"
             action = "all_reviews_completed"
+        elif state["video_script"]["status"] == "approved":
+            state["pipeline_status"] = "generating_derivatives"
+            action = "wait_for_cover_assets"
         else:
             state["pipeline_status"] = "derivatives_pending_review"
             action = "wait_for_sibling_review"
@@ -119,9 +139,12 @@ def apply_review_command(
         elif state["wechat_article"]["status"] != "approved":
             state["pipeline_status"] = "derivatives_pending_review"
             action = "wait_for_sibling_review"
-        else:
+        elif cover_assets_ready(state):
             state["pipeline_status"] = "ready_for_manual_publish"
             action = "all_reviews_completed"
+        else:
+            state["pipeline_status"] = "generating_derivatives"
+            action = "wait_for_cover_assets"
 
     atomic_write_json(state_path, state)
     return {"changed": True, "action": action, "state": state}
@@ -149,7 +172,12 @@ def build_acknowledgement(command: dict[str, str], result: dict) -> str:
     if result["action"] == "all_reviews_completed":
         return (
             f"审核已记录：{entry_key} {label}已通过。\n"
-            "本条日记的视频脚本和公众号文章均已通过；公众号文章请手工写入并发布。"
+            "视频脚本、公众号文章和平台封面均已就绪；公众号文章请手工写入并发布。"
+        )
+    if result["action"] == "wait_for_cover_assets":
+        return (
+            f"审核已记录：{entry_key} {label}已通过。\n"
+            "视频和文章审核已完成，正在等待公众号与小红书封面归档。"
         )
     return (
         f"审核已记录：{entry_key} {label}已通过。\n"

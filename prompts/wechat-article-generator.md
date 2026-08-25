@@ -58,6 +58,10 @@ It extends one real experience into a viewpoint-led WeChat Official Account arti
 
 给出3-5个具体、克制、不标题党的标题。
 
+## 核心观点
+
+用一句话写出文章实际论证的中心观点，供封面分支读取；不要写口号。
+
 ## 封面摘要
 
 写一段60-100字、可用于公众号摘要栏的文字。

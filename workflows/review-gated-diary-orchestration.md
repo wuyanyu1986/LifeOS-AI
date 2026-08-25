@@ -6,7 +6,9 @@
 
 ## Goal
 
-Require explicit human approval of the standard parsed note before generating derivative content. Notify and review the video script and WeChat article independently.
+Require explicit human approval of the standard parsed note before generating
+derivative content. Generate video, article, and cover branches in parallel;
+notify and review the video script and WeChat article independently.
 
 ## Actors
 
@@ -16,7 +18,7 @@ Require explicit human approval of the standard parsed note before generating de
 | Review orchestrator | Persist state and enforce review gates |
 | Feishu bot | Send reminders and receive review commands |
 | Reviewer | Approve or request changes |
-| Content generators | Create video and article drafts after approval |
+| Content generators | Create video, article, and cross-platform cover assets after approval |
 
 ## Trigger Strategy
 
@@ -46,19 +48,23 @@ new parsed note detected
   -> generating_derivatives
      -> create video script -> send video review reminder
      -> create WeChat article -> send article review reminder
+     -> create cover brief -> wait for article metadata -> render platform covers
+        -> create a cover child page under the article -> upload three images
   -> derivatives_pending_review
      -> video approved independently
      -> article approved independently
+     -> current cover assets archived
   -> ready_for_manual_publish
   -> owner manually writes and publishes the approved article
 ```
 
 ## Hard Gates
 
-1. `parsed_note.status` must equal `approved` before either derivative generator can run.
+1. `parsed_note.status` must equal `approved` before any derivative generator can run.
 2. Video approval never implies article approval, and article approval never implies video approval.
 3. Article approval never writes to the WeChat Official Account backend.
-4. The automated pipeline stops at `ready_for_manual_publish` after both derivatives are approved.
+4. The automated pipeline stops at `ready_for_manual_publish` after video and
+   article approval plus current-revision cover archival.
 5. A change request updates only the affected output and increments its revision.
 
 ## Review Commands
@@ -81,6 +87,7 @@ Reject ambiguous commands and reply with the accepted syntax. Only the configure
 - Parsed note: send one `待审核` message after first detection.
 - Video script: send a separate `待审核` message after creation or revision.
 - WeChat article: send a separate `待审核` message after creation or revision.
+- Cover assets: send one `已生成` message after the child page contains all three images.
 - Use an idempotency key composed of `stage + wiki_node_token + revision`.
 - Retry transient send failures three times with backoff; persist `notification_status=failed` after the final attempt.
 
@@ -94,7 +101,8 @@ Every reminder must contain the date, content type, document link, revision, cur
 | Duplicate detection | Return existing state; do not notify again |
 | Parsed note fetch fails | Mark processing failure and retry; do not generate content |
 | Reminder send fails | Keep content pending review and retry notification |
-| One derivative fails | Preserve the successful sibling; retry only the failed branch |
+| One derivative fails | Preserve successful siblings; retry only the failed branch |
+| Cover image upload partially fails | Keep the child page and retry only missing images |
 | Invalid reviewer command | Keep existing state and send syntax guidance |
 | Concurrent approvals | First valid transition wins; later duplicates are idempotent |
 
@@ -112,9 +120,9 @@ Persist one state record per date using `schemas/review-state.schema.json`. The 
 
 1. A new date node causes exactly one parsed-note reminder.
 2. No derivative is created before parsed-note approval.
-3. Parsed-note approval creates both derivative jobs.
-4. Video and article each produce their own reminder.
+3. Parsed-note approval creates three derivative jobs.
+4. Video and article each produce review reminders; cover completion produces an informational reminder.
 5. Requesting changes to one derivative does not regenerate the other.
 6. Re-running the scanner creates no duplicate reminders or documents.
-7. Article approval does not create a cover, browser package, or WeChat draft.
-8. Both derivative approvals set `ready_for_manual_publish` for manual handling.
+7. Article approval never creates a WeChat draft or opens a platform backend.
+8. Both approvals plus current-revision cover archival set `ready_for_manual_publish`.

@@ -34,9 +34,65 @@
     },
     "wechat_article": {
       "$ref": "#/$defs/reviewableOutput"
+    },
+    "cover_assets": {
+      "$ref": "#/$defs/coverAssets"
     }
   },
   "$defs": {
+    "coverAssets": {
+      "type": "object",
+      "required": ["status", "revision", "notification_status"],
+      "properties": {
+        "status": {
+          "enum": [
+            "not_created",
+            "briefing",
+            "waiting_for_article",
+            "generating",
+            "archived",
+            "superseded",
+            "failed"
+          ]
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source_article_revision": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "wiki_node_token": {
+          "type": ["string", "null"]
+        },
+        "doc_token": {
+          "type": ["string", "null"]
+        },
+        "master_path": {
+          "type": ["string", "null"]
+        },
+        "xiaohongshu_path": {
+          "type": ["string", "null"]
+        },
+        "wechat_wide_path": {
+          "type": ["string", "null"]
+        },
+        "wechat_square_path": {
+          "type": ["string", "null"]
+        },
+        "notification_status": {
+          "enum": ["not_sent", "sent", "failed"]
+        },
+        "notification_message_id": {
+          "type": ["string", "null"]
+        },
+        "last_error": {
+          "type": ["string", "null"]
+        }
+      },
+      "additionalProperties": false
+    },
     "reviewableOutput": {
       "type": "object",
       "required": ["status", "revision", "notification_status"],

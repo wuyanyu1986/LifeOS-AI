@@ -46,7 +46,7 @@ class ReviewMessageListenerTest(unittest.TestCase):
             },
             {"action": "all_reviews_completed"},
         )
-        self.assertIn("均已通过", acknowledgement)
+        self.assertIn("均已就绪", acknowledgement)
         self.assertIn("手工写入", acknowledgement)
 
     def test_article_approval_completes_reviews_without_draft_branch(self):
@@ -93,6 +93,81 @@ class ReviewMessageListenerTest(unittest.TestCase):
             {"action": "all_reviews_completed"},
         )
         self.assertIn("手工写入", acknowledgement)
+
+    def test_approvals_wait_for_current_cover_assets(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state_path = Path(directory) / "review-state.json"
+            state_path.write_text(
+                json.dumps(
+                    {
+                        "pipeline_status": "derivatives_pending_review",
+                        "parsed_note": {"status": "approved"},
+                        "video_script": {"status": "approved"},
+                        "wechat_article": {
+                            "status": "pending_review",
+                            "revision": 2,
+                            "reviewer_open_id": None,
+                            "reviewed_at": None,
+                            "review_comment": None,
+                        },
+                        "cover_assets": {
+                            "status": "archived",
+                            "source_article_revision": 1,
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            result = apply_review_command(
+                state_path,
+                {
+                    "decision": "approved",
+                    "entry_key": "2026-08-24-2",
+                    "stage": "wechat_article",
+                    "comment": "",
+                },
+                "ou_reviewer",
+            )
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            self.assertEqual(result["action"], "wait_for_cover_assets")
+            self.assertEqual(state["pipeline_status"], "generating_derivatives")
+
+    def test_article_change_supersedes_cover_assets(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state_path = Path(directory) / "review-state.json"
+            state_path.write_text(
+                json.dumps(
+                    {
+                        "pipeline_status": "derivatives_pending_review",
+                        "parsed_note": {"status": "approved"},
+                        "video_script": {"status": "approved"},
+                        "wechat_article": {
+                            "status": "pending_review",
+                            "revision": 1,
+                            "reviewer_open_id": None,
+                            "reviewed_at": None,
+                            "review_comment": None,
+                        },
+                        "cover_assets": {
+                            "status": "archived",
+                            "source_article_revision": 1,
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            apply_review_command(
+                state_path,
+                {
+                    "decision": "changes_requested",
+                    "entry_key": "2026-08-24-2",
+                    "stage": "wechat_article",
+                    "comment": "修改观点",
+                },
+                "ou_reviewer",
+            )
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            self.assertEqual(state["cover_assets"]["status"], "superseded")
 
     def test_parsed_approval_queues_derivative_generation(self):
         with tempfile.TemporaryDirectory() as directory:

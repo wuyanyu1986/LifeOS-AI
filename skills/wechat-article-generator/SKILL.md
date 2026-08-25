@@ -21,7 +21,8 @@ Generate the article directly from the standard parsed note. Treat an existing v
 3. Build the article from concrete scene to event, turn, reflection, broader meaning, and personal choice.
 4. Draft 1800-2200 Chinese characters with short mobile-friendly paragraphs and two to four useful subheadings.
 5. Check every concrete claim against the parsed note or transcript.
-6. Add three to five alternate titles and a 60-100 character cover summary.
+6. Add three to five alternate titles, one machine-readable central viewpoint,
+   and a 60-100 character cover summary.
 
 ## Writing Rules
 
@@ -45,6 +46,8 @@ Generate the article directly from the standard parsed note. Treat an existing v
 ---
 
 ## 备选标题
+
+## 核心观点
 
 ## 封面摘要
 ```
