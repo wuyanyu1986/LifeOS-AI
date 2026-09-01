@@ -1,0 +1,36 @@
+{
+  "storage": {
+    "mode": "workspace",
+    "workspace_output_dir": "entries",
+    "source_dir": "inputs"
+  },
+  "feishu": {
+    "enabled": false,
+    "connector": "feishu",
+    "wiki_root_token": "",
+    "create_entry_page": true,
+    "create_cover_child_page": true,
+    "sync_after_approval": false
+  },
+  "review": {
+    "notification_enabled": false,
+    "require_parsed_note_approval": true,
+    "require_branch_approval": true
+  },
+  "content": {
+    "default_platforms": [
+      "wechat",
+      "xiaohongshu",
+      "douyin",
+      "video"
+    ],
+    "generate_cover": true
+  },
+  "automation": {
+    "enabled": false,
+    "input_scan_enabled": false,
+    "review_reconciliation_enabled": false,
+    "sync_enabled": false,
+    "timezone": "Asia/Shanghai"
+  }
+}

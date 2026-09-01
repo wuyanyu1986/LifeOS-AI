@@ -5,6 +5,10 @@ description: "将每日感想的标准解析稿延展为有明确观点、阅读
 
 # WeChat Article Generator
 
+This is the WeChat-specific execution branch of `skills/viral-writer/SKILL.md`.
+Use Viral Writer's shared strategy and source-fidelity rules first; this file
+adds the WeChat-specific length, tone, and Feishu output contract.
+
 Generate the article directly from the standard parsed note. Treat an existing video script only as a voice reference, not as the factual source.
 
 ## Required Input

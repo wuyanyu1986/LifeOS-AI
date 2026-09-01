@@ -57,6 +57,8 @@ LifeOS AI V1.0 使用多 Agent 协作，而不是让一个通用 Agent 处理所
 
 ## 4. Content Generator Agent
 
+内容生成角色由项目内的 `skills/viral-writer/SKILL.md` 统一约束。它先基于 11 个内容洞见维度形成策略，再按平台生成独立分支。
+
 职责：
 
 - 从私密日记中提取可公开素材。
@@ -67,6 +69,8 @@ LifeOS AI V1.0 使用多 Agent 协作，而不是让一个通用 Agent 处理所
 
 - 文章提纲
 - 短视频脚本
+- 小红书笔记
+- 抖音口播文案
 - 播客提纲
 - 社交媒体草稿
 - 复盘卡片
@@ -86,6 +90,6 @@ LifeOS AI V1.0 使用多 Agent 协作，而不是让一个通用 Agent 处理所
 Diary Analysis Agent
   -> Cognitive Challenge Agent
   -> Memory Agent
-  -> Content Generator Agent
+  -> Viral Writer 内容策略层
+  -> 平台内容分支（公众号 / 小红书 / 抖音）
 ```
-

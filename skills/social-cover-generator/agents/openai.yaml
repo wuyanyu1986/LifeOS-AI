@@ -1,4 +1,4 @@
 interface:
   display_name: "公众号与小红书封面生成器"
   short_description: "生成跨平台封面并归档到公众号文章子页面"
-  default_prompt: "使用 $social-cover-generator，基于标准解析稿和当前公众号文章生成适配小红书与公众号的封面，并归档到文章下的飞书子页面。"
+  default_prompt: "使用 $social-cover-generator，并调用 op7418/guizang-social-card-skill，基于标准解析稿和当前公众号文章生成小红书图文及公众号 21:9 + 1:1 封面对，最后归档到文章下的飞书子页面。"

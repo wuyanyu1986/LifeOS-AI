@@ -6,11 +6,37 @@ from pathlib import Path
 from scripts.review_message_listener import (
     apply_review_command,
     build_acknowledgement,
+    find_review_state,
     parse_review_command,
 )
 
 
 class ReviewMessageListenerTest(unittest.TestCase):
+    def test_find_review_state_by_entry_date_for_named_recording(self):
+        with tempfile.TemporaryDirectory() as directory:
+            entries_dir = Path(directory)
+            state_path = entries_dir / "2026-08-28-召楼路-8" / "review-state.json"
+            state_path.parent.mkdir()
+            state_path.write_text(
+                json.dumps({"entry_date": "2026-08-28"}), encoding="utf-8"
+            )
+
+            self.assertEqual(
+                find_review_state(entries_dir, "2026-08-28"), state_path
+            )
+
+    def test_find_review_state_rejects_ambiguous_date(self):
+        with tempfile.TemporaryDirectory() as directory:
+            entries_dir = Path(directory)
+            for suffix in ("morning", "evening"):
+                state_path = entries_dir / f"2026-08-28-{suffix}" / "review-state.json"
+                state_path.parent.mkdir()
+                state_path.write_text(
+                    json.dumps({"entry_date": "2026-08-28"}), encoding="utf-8"
+                )
+
+            self.assertIsNone(find_review_state(entries_dir, "2026-08-28"))
+
     def test_parse_approve_command(self):
         self.assertEqual(
             parse_review_command("通过 2026-08-24-1 标准解析稿"),

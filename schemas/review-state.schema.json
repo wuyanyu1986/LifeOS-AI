@@ -29,10 +29,19 @@
     "parsed_note": {
       "$ref": "#/$defs/reviewableOutput"
     },
+    "unabridged_parse": {
+      "$ref": "#/$defs/sourceArchive"
+    },
     "video_script": {
       "$ref": "#/$defs/reviewableOutput"
     },
     "wechat_article": {
+      "$ref": "#/$defs/reviewableOutput"
+    },
+    "xiaohongshu_note": {
+      "$ref": "#/$defs/reviewableOutput"
+    },
+    "douyin_script": {
       "$ref": "#/$defs/reviewableOutput"
     },
     "cover_assets": {
@@ -132,6 +141,18 @@
         "review_comment": {
           "type": ["string", "null"]
         }
+      },
+      "additionalProperties": false
+    },
+    "sourceArchive": {
+      "type": "object",
+      "required": ["file", "revision", "immutability"],
+      "properties": {
+        "file": {"type": "string"},
+        "wiki_node_token": {"type": ["string", "null"]},
+        "doc_token": {"type": ["string", "null"]},
+        "revision": {"type": "integer", "minimum": 0},
+        "immutability": {"const": "append-only"}
       },
       "additionalProperties": false
     }

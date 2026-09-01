@@ -7,8 +7,9 @@
 ## Goal
 
 Require explicit human approval of the standard parsed note before generating
-derivative content. Generate video, article, and cover branches in parallel;
-notify and review the video script and WeChat article independently.
+derivative content. Run the Viral Writer strategy layer, then generate video,
+WeChat, Xiaohongshu, Douyin, and cover branches independently; notify and
+review each selected content branch independently.
 
 ## Actors
 
@@ -46,8 +47,8 @@ new parsed note detected
   -> send parsed-note review reminder
   -> reviewer approves
   -> generating_derivatives
-     -> create video script -> send video review reminder
-     -> create WeChat article -> send article review reminder
+     -> Viral Writer strategy
+     -> create selected platform branches -> send independent review reminders
      -> create cover brief -> wait for article metadata -> render platform covers
         -> create a cover child page under the article -> upload three images
   -> derivatives_pending_review
@@ -63,8 +64,8 @@ new parsed note detected
 1. `parsed_note.status` must equal `approved` before any derivative generator can run.
 2. Video approval never implies article approval, and article approval never implies video approval.
 3. Article approval never writes to the WeChat Official Account backend.
-4. The automated pipeline stops at `ready_for_manual_publish` after video and
-   article approval plus current-revision cover archival.
+4. The automated pipeline stops at `ready_for_manual_publish` after all
+   selected content approvals plus current-revision visual archival.
 5. A change request updates only the affected output and increments its revision.
 
 ## Review Commands
@@ -110,6 +111,26 @@ Every reminder must contain the date, content type, document link, revision, cur
 
 Persist one state record per date using `schemas/review-state.schema.json`. The Wiki node token is the stable external identifier. Store raw audio and transcripts locally; never include them in review messages.
 
+Review actions are a durable queue, not a notification-only log. Every automation
+run must call:
+
+```bash
+python3 scripts/review_action_queue.py pending
+```
+
+Process pending actions in order. Advance the source cursor only after the action
+has completed successfully:
+
+```bash
+python3 scripts/review_action_queue.py ack \
+  --queue "/absolute/path/to/review-actions.ndjson" \
+  --line ACTION_LINE
+```
+
+Never acknowledge an action before its requested documents, state transitions,
+uploads, and notifications have settled. A failed run must leave the action
+pending for the next reconciliation run.
+
 ## Assumptions
 
 - MVP uses polling because a Wiki child-created event has not been confirmed for the current app.
@@ -125,4 +146,5 @@ Persist one state record per date using `schemas/review-state.schema.json`. The 
 5. Requesting changes to one derivative does not regenerate the other.
 6. Re-running the scanner creates no duplicate reminders or documents.
 7. Article approval never creates a WeChat draft or opens a platform backend.
-8. Both approvals plus current-revision cover archival set `ready_for_manual_publish`.
+8. All selected content approvals plus current-revision visual archival set
+   `ready_for_manual_publish`.

@@ -23,7 +23,16 @@ This skill does not create a video script. It creates a structured parsed note.
 - Timestamped transcript if available
 - Privacy preference
 
-## Output Structure
+## Output Files
+
+每次解析必须同时生成两个文件：
+
+1. `current-content.md`：当前可供用户审核、归档和下游内容生成的整理稿。
+2. `audio-parse-unabridged.md`：基于音频转写的无删减解析稿，保留原始表达、重复、停顿标记、未决信息和完整时间顺序；只允许修复明确的 ASR 错字，不做摘要、不删减、不润色。
+
+`current-content.md` 可以被用户修改；`audio-parse-unabridged.md` 是不可变的来源档案。下游内容生成只读取审核通过的 `current-content.md`，需要核对原话时再读取无删减档案。
+
+## Current Content Structure
 
 Always output:
 
@@ -41,6 +50,15 @@ Always output:
 
 ### 🔍 处理说明
 ```
+
+在 `current-content.md` 顶部记录：`source_unabridged_file`、`source_revision` 和 `content_revision`。
+
+## Unabridged Parse Rules
+
+- 按音频时间顺序保留全部可辨识内容，包括重复、口头语和自我修正。
+- 不把推测补成事实；听不清处写 `[听不清 00:12:03]`。
+- 不为了可读性删除内容；必要的隐私遮罩必须记录在处理说明中。
+- 无删减稿不进入公开内容生成，也不作为公开内容的默认展示稿。
 
 ## Processing Rules
 
@@ -123,4 +141,3 @@ Use `prompts/audio-diary-standard-parser.md` as the full prompt template.
 ## Reference Workflow
 
 Use `workflows/audio-diary-standard-processing-flow.md` for the end-to-end local and Feishu process.
-

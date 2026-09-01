@@ -75,7 +75,8 @@ Suggested files:
 source-notes.md
 transcript-raw.txt
 transcript-raw.json
-standard-parsed-note.md
+current-content.md
+audio-parse-unabridged.md
 processing-status.md
 ```
 
@@ -115,7 +116,7 @@ Current model:
 .models/ggml-base.bin
 ```
 
-## Step 5: Generate Standard Parsed Note
+## Step 5: Generate Two Parsed Outputs
 
 Use:
 
@@ -129,13 +130,14 @@ Input:
 - `transcript-raw.json` if timestamps are needed
 - source metadata such as duration and speaker count
 
-Output:
+Outputs:
 
 ```text
-standard-parsed-note.md
+current-content.md
+audio-parse-unabridged.md
 ```
 
-The result should match the ideal Feishu format:
+`current-content.md` must match the ideal Feishu format:
 
 - 智能总结
 - 录音信息
@@ -146,9 +148,9 @@ The result should match the ideal Feishu format:
 - 待办事项
 - 处理说明
 
-## Step 6: Create Feishu Wiki Child Document
+## Step 6: Create Feishu Wiki Child Documents
 
-Create a child document under the target root or date node:
+Create the current-content document under the target root or date node:
 
 ```bash
 lark-cli docs +create \
@@ -156,10 +158,23 @@ lark-cli docs +create \
   --as user \
   --title "YYYY-MM-DD" \
   --wiki-node "YCRZwOZ8GibC7pkt9L1cHh8enXf" \
-  --markdown @entries/YYYY-MM-DD-daily-reflection/standard-parsed-note.md
+  --markdown @entries/YYYY-MM-DD-daily-reflection/current-content.md
 ```
 
-If creating a derivative such as a video script under the daily note, use the daily note's wiki node token as `--wiki-node`.
+Create the unabridged archive as a separate, clearly marked child document. It
+must not replace the current-content document and should inherit the same
+privacy access policy:
+
+```bash
+lark-cli docs +create \
+  --profile siyangyuan-tiantu \
+  --as user \
+  --title "YYYY-MM-DD 音频解析无删减" \
+  --wiki-node "YCRZwOZ8GibC7pkt9L1cHh8enXf" \
+  --markdown @entries/YYYY-MM-DD-daily-reflection/audio-parse-unabridged.md
+```
+
+If creating a derivative such as a video script under the daily note, use the current-content document's wiki node token as `--wiki-node`.
 
 ## Step 7: Verify Feishu Output
 
@@ -206,5 +221,7 @@ Use `workflows/standard-parsed-note-review.md` and `workflows/review-gated-diary
 - [ ] 待办事项 only includes explicit actions
 - [ ] Feishu child document created
 - [ ] Feishu output verified
+- [ ] `current-content.md` and `audio-parse-unabridged.md` both exist
+- [ ] Unabridged file is complete, source-linked, and not summarized
 - [ ] Parsed-note review reminder sent exactly once
 - [ ] Parsed note explicitly approved before downstream generation

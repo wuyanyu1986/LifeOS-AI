@@ -69,7 +69,20 @@ def atomic_write_json(path: Path, value: dict) -> None:
 
 def find_review_state(entries_dir: Path, entry_key: str) -> Path | None:
     exact = entries_dir / f"{entry_key}-daily-reflection" / "review-state.json"
-    return exact if exact.exists() else None
+    if exact.exists():
+        return exact
+
+    candidates: list[Path] = []
+    for state_path in entries_dir.glob("*/review-state.json"):
+        try:
+            state = load_json(state_path)
+        except (json.JSONDecodeError, OSError):
+            continue
+        if state.get("entry_date") == entry_key:
+            candidates.append(state_path)
+
+    # A date-only review command is unsafe when multiple recordings share a date.
+    return candidates[0] if len(candidates) == 1 else None
 
 
 def cover_assets_ready(state: dict) -> bool:

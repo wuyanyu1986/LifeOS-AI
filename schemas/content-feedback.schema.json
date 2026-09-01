@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lifeos.local/schemas/content-feedback.schema.json",
+  "title": "LifeOS Content Revision Feedback",
+  "type": "object",
+  "required": ["feedback_id", "entry_id", "platform", "source_revision", "original_file", "revised_file", "status", "candidates"],
+  "properties": {
+    "feedback_id": {"type": "string"},
+    "entry_id": {"type": "string"},
+    "platform": {"enum": ["wechat", "xiaohongshu", "douyin", "all"]},
+    "source_revision": {"type": "integer", "minimum": 0},
+    "content_revision": {"type": "integer", "minimum": 0},
+    "original_file": {"type": "string"},
+    "revised_file": {"type": "string"},
+    "status": {"enum": ["candidate", "confirmed", "rejected", "applied"]},
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["rule", "evidence", "confidence"],
+        "properties": {
+          "rule": {"type": "string"},
+          "evidence": {"type": "string"},
+          "confidence": {"enum": ["low", "medium", "high"]},
+          "scope": {"enum": ["wechat", "xiaohongshu", "douyin", "all"]}
+        },
+        "additionalProperties": false
+      }
+    },
+    "confirmed_at": {"type": ["string", "null"], "format": "date-time"},
+    "applied_constraint_ids": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

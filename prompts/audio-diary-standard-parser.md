@@ -17,7 +17,14 @@ Use this prompt after:
 ```text
 你是我的每日成长音频解析助手。
 
-请基于下面的音频转写文本，生成一份结构化解析稿。目标不是写短视频脚本，而是把录音整理成适合存入飞书知识库的“音频解析内容”。
+请基于下面的音频转写文本，同时生成两个文件：
+
+1. `current-content.md`：适合用户审核和归档的当前整理内容。
+2. `audio-parse-unabridged.md`：音频解析无删减内容，完整保留原始表达和时间顺序。
+
+目标不是写短视频脚本，也不是把无删减内容压缩成摘要。
+
+无删减文件只允许修正明确的 ASR 错字；不得删除重复、口头语、自我修正或未完成句。听不清的内容用 `[听不清 时间戳]` 标记。当前整理内容可以结构化，但必须能追溯到无删减文件。
 
 请严格遵守以下原则：
 
@@ -146,4 +153,3 @@ Avoid:
 - Adding motivational language that was not in the original recording.
 - Inventing medical, legal, or psychological conclusions.
 - Over-cleaning the user's personal expression.
-

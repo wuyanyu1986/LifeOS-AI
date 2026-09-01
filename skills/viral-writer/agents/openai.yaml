@@ -1,0 +1,4 @@
+interface:
+  display_name: "Viral Writer 多平台内容创作"
+  short_description: "基于已审核日记解析稿生成公众号、小红书和抖音内容"
+  default_prompt: "使用 $viral-writer，基于已审核标准解析稿完成 11 维内容策略分析，并生成指定平台的内容、标题和配图指导。"
